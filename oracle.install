@@ -9,18 +9,23 @@ post_install() {
 
 	if [ -e `grep oracle /etc/passwd` ]; then
 		echo -n "creating user \"oracle\" ..."
-		useradd -d /usr/lib/oracle -g dba -s /bin/false oracle
+		useradd -d /opt/oracle -g dba -s /bin/false oracle
 		echo "done"
 		echo
 	fi
 
 	echo -n "change directory rights ..."
-	chown -R oracle:dba /usr/lib/oracle
+	chown -R oracle:dba /opt/oracle
+	echo "done"
+	echo
+
+	echo -n "allow users to cd into /opt/oracle"
+	chmod 755 /opt/oracle
 	echo "done"
 	echo
 
 	echo -n "set sticky bit to oracle executable ..."
-	chmod 6755 /usr/lib/oracle/product/11.2.0/xe/bin/oracle
+	chmod 6755 /opt/oracle/product/18c/dbhomeXE/bin/oracle
 	echo "done"
 	echo
 
@@ -49,12 +54,20 @@ post_install() {
 		memory_target=`echo $memory_target \* 1048576 | bc`
 	fi
 
-	/bin/sed -i "s/%memory_target%/$memory_target/g" /usr/lib/oracle/product/11.2.0/xe/config/scripts/init.ora
-	/bin/sed -i "s/%memory_target%/$memory_target/g" /usr/lib/oracle/product/11.2.0/xe/config/scripts/initXETemp.ora
+	/bin/sed -i "s/%memory_target%/$memory_target/g" /opt/oracle/product/18c/dbhomeXE/srvm/admin/init.ora
+	/bin/sed -i "s/%memory_target%/$memory_target/g" /opt/oracle/product/18c/dbhomeXE/dbs/init.ora
+
+	echo "running ORACLE root.sh script "
+	/opt/oracle/product/18c/dbhomeXE/root.sh
+	echo "done"
+
+	echo "fixing owner of /etc/oratab"
+	chown oracle:dba /etc/oratab
+	echo "done"
 
 	echo
 	echo "add your user to the \"dba\" group in order to use the oracle tools"
-	echo "run \"/etc/rc.d/oracle-xe configure\" to configure oracle-xe and start using it"
+	echo "run \"/etc/init.d/oracle-xe-18c configure\" to configure oracle-xe-18c and start using it"
 	echo
 }
 
@@ -72,9 +85,9 @@ post_remove() {
 		echo "done"
 	fi
 
-	if [ -f /etc/rc.d/oracle-xe ]; then
-		echo -n "remove /etc/rc.d/oracle-xe ..."
-		rm /etc/rc.d/oracle-xe
+	if [ -f /etc/init.d/oracle-xe-18c ]; then
+		echo -n "remove /etc/init.d/oracle-xe-18c ..."
+		rm /etc/init.d/oracle-xe-18c
 		echo "done"
 	fi
 
@@ -86,9 +99,9 @@ post_remove() {
 
 	if [ -d /etc/sysconfig ]; then
 
-		if [ -f /etc/sysconfig/oracle-xe ]; then
-			echo -n "remove /etc/sysconfig/oracle-xe ..."
-			rm -rf /etc/sysconfig/oracle-xe
+		if [ -f /etc/sysconfig/oracle-xe-18c ]; then
+			echo -n "remove /etc/sysconfig/oracle-xe-18c ..."
+			rm -rf /etc/sysconfig/oracle-xe-18c.conf
 			echo "done"
 		fi
 
@@ -98,15 +111,15 @@ post_remove() {
 			echo "done"
 		fi
 	fi
-	if [ -f /etc/default/oracle-xe ]; then
-		echo -n "remove /etc/default/oracle-xe ..."
-		rm -rf /etc/default/oracle-xe
+	if [ -f /etc/default/oracle-xe-18c ]; then
+		echo -n "remove /etc/default/oracle-xe-18c ..."
+		rm -rf /etc/default/oracle-xe-18c
 		echo "done"
 	fi
 
-	if [ -d /usr/lib/oracle ]; then
-		echo -n "remove /usr/lib/oracle ..."
-		rm -rf /usr/lib/oracle
+	if [ -d /opt/oracle ]; then
+		echo -n "remove /opt/oracle ..."
+		rm -rf /opt/oracle
 		echo "done"
 	fi
 
