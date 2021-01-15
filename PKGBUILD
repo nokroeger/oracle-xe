@@ -53,8 +53,8 @@ package() {
     chmod +x $srcdir/etc/profile.d/oracle_env.*
 
     # LD_LIBRARY_PATH
-    mkdir -p $srcdir/etc/ld.so.conf.d/
-    cp $srcdir/oracle-xe-18c.conf $srcdir/etc/ld.so.conf.d/
+    #mkdir -p $srcdir/etc/ld.so.conf.d/
+    #cp $srcdir/oracle-xe-18c.conf $srcdir/etc/ld.so.conf.d/
 
     # For systemd
     mkdir -p $srcdir/etc/systemd/system
